@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Offline Store</title>
+
+<style>
+body{
+    font-family:Arial;
+    margin:0;
+    background:#f3f4f6;
+}
+
+header{
+    background:#111827;
+    color:white;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.products{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+    padding:30px;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card img{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+button{
+    padding:6px 12px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+.cart{
+    position:fixed;
+    right:0;
+    top:0;
+    width:300px;
+    height:100%;
+    background:white;
+    padding:15px;
+    box-shadow:-2px 0 10px rgba(0,0,0,0.2);
+    overflow:auto;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>My Store</h2>
+    Cart: <span id="cartCount">0</span>
+</header>
+
+<section class="products" id="products"></section>
+
+<div class="cart">
+    <h3>Cart</h3>
+    <div id="cartItems"></div>
+    <p>Total: ₹<span id="total">0</span></p>
+</div>
+
+<script>
+
+// Simple colored placeholder images (SVG embedded)
+function placeholder(color,text){
+return `data:image/svg+xml;base64,${btoa(`
+<svg xmlns='http://www.w3.org/2000/svg' width='300' height='200'>
+<rect width='100%' height='100%' fill='${color}'/>
+<text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
+font-size='20' fill='white'>${text}</text>
+</svg>`)}`
+}
+
+const products = [
+{
+id:1,
+name:"Headphones",
+price:1500,
+image:"https://images.pexels.com/photos/3394650/pexels-photo-3394650.jpeg"
+},
+{
+id:2,
+name:"Laptop",
+price:55000,
+image:"https://images.pexels.com/photos/18105/pexels-photo.jpg"
+},
+{
+id:3,
+name:"Shoes",
+price:2000,
+image:"https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg"
+},
+{
+id:4,
+name:"Backpack",
+price:1200,
+image:"https://images.pexels.com/photos/2905238/pexels-photo-2905238.jpeg"
+}
+];
+
+let cart=[];
+
+const productsDiv=document.getElementById("products");
+const cartDiv=document.getElementById("cartItems");
+
+function displayProducts(){
+products.forEach(p=>{
+productsDiv.innerHTML+=`
+<div class="card">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p>₹${p.price}</p>
+<button onclick="addToCart(${p.id})">Add</button>
+</div>`;
+});
+}
+
+function addToCart(id){
+const item=products.find(p=>p.id===id);
+const exist=cart.find(p=>p.id===id);
+
+if(exist){exist.qty++}
+else{cart.push({...item,qty:1})}
+
+updateCart();
+}
+
+function updateCart(){
+cartDiv.innerHTML="";
+let total=0;
+
+cart.forEach((item,i)=>{
+total+=item.price*item.qty;
+
+cartDiv.innerHTML+=`
+<p>${item.name} x ${item.qty}
+<button onclick="changeQty(${i},1)">+</button>
+<button onclick="changeQty(${i},-1)">-</button>
+</p>`;
+});
+
+document.getElementById("cartCount").innerText=cart.length;
+document.getElementById("total").innerText=total;
+}
+
+function changeQty(i,val){
+cart[i].qty+=val;
+if(cart[i].qty<=0){cart.splice(i,1)}
+updateCart();
+}
+
+displayProducts();
+
+</script>
+
+</body>
+</html>
